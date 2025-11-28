@@ -6,8 +6,9 @@ This repository contains a static portfolio website built using the Tooplate fre
 ## Overview
 - Amazon S3 stores the site’s static assets (HTML, CSS, JS, images) with durability and high availability.
 - Amazon CloudFront is configured with the S3 bucket as its origin, providing a global CDN for low‑latency content delivery.
-- Public access to the S3 bucket is fully blocked; CloudFront uses an Origin Access Control (OAC) to reach the bucket securely.
+- Public access to the S3 bucket is fully blocked (S3 Public Access Block enabled); CloudFront uses an Origin Access Control (OAC) to reach the bucket securely.
 - S3 Server‑Side Encryption (SSE) is enabled to protect data at rest, adding defense‑in‑depth to the architecture.
+- S3 bucket versioning is enabled to preserve object history and support rollbacks.
 - Terraform manages the AWS resources and uses an S3 remote backend for state.
 - GitHub Actions provides CI/CD, assuming an AWS IAM role via OIDC (no long‑lived AWS keys required).
 
@@ -15,8 +16,10 @@ This repository contains a static portfolio website built using the Tooplate fre
 ## AWS Architecture
 - S3 bucket (origin)
   - Static hosting of the portfolio files.
-  - Public access blocked.
+  - Public access blocked (S3 Public Access Block enabled).
   - Server‑Side Encryption (SSE) enabled.
+  - Bucket versioning enabled for rollback and object history.
+  - Bucket policy restricts data access to CloudFront only (via OAC) for s3:GetObject and s3:PutObject, scoped with an AWS:SourceArn condition to the specific distribution.
 - CloudFront distribution
   - Origin: The S3 bucket via OAC.
   - Default root object: index.html.
@@ -100,8 +103,10 @@ aws cloudfront create-invalidation --distribution-id <dist-id> --paths "/*"
 
 
 ## Security Notes
-- Public access to the S3 bucket is blocked; CloudFront uses Origin Access Control to reach the bucket.
+- Public access to the S3 bucket is blocked (S3 Public Access Block enabled); CloudFront uses Origin Access Control to reach the bucket.
 - S3 Server‑Side Encryption (SSE) is enabled to protect data at rest.
+- S3 bucket versioning is enabled to preserve object history and support rollbacks.
+- The S3 bucket policy permits only the CloudFront service principal to perform s3:GetObject and s3:PutObject, scoped with an AWS:SourceArn condition to the specific distribution. CI uploads use an assumed IAM role with appropriate s3 permissions (not public access).
 - GitHub Actions authenticates to AWS using OIDC to avoid long‑lived AWS access keys in secrets.
 
 
