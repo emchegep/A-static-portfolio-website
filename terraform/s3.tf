@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "origin_bucket_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.hosting.arn}/*",
+      "${aws_s3_bucket.portfolio.arn}/*",
     ]
 
     condition {
@@ -24,12 +24,12 @@ data "aws_iam_policy_document" "origin_bucket_policy" {
     }
   }
 }
-resource "aws_s3_bucket" "hosting" {
-  bucket = "klaudtech-sell-my-stuff"
+resource "aws_s3_bucket" "portfolio" {
+  bucket = "klaudtech-portfolio-site"
 }
 
-resource "aws_s3_bucket_policy" "hosting" {
-  bucket = aws_s3_bucket.hosting.bucket
+resource "aws_s3_bucket_policy" "portfolio" {
+  bucket = aws_s3_bucket.portfolio.bucket
   policy = data.aws_iam_policy_document.origin_bucket_policy.json
 }
 
